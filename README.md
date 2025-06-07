@@ -35,6 +35,34 @@ GPUs of memory>=4G shall be sufficient for this experiment.
 
 Code of other tasks will be comming soon.
 
+### CBIS-DDSM Breast Tumor Segmentation
+The repository also provides simple scripts for training and testing on the CBIS-DDSM dataset. The dataset should be organised as
+
+```
+CBIS_pre/
+    training_data_all_CBIS_256/
+        img/  # training images
+        msk/  # training masks
+    test_data_all_CBIS_256/
+        img/  # testing images
+        msk/  # testing masks
+```
+
+Images are resized to 192x256 during loading to match the network input.
+
+Training on two GPUs can be launched by
+
+```
+python train_cbis.py --epoch 25 --batchsize 16
+```
+
+After training, the network can be evaluated with
+
+```
+python test_cbis.py --ckpt_path snapshots/TransFuse_CBIS/TransFuse-<epoch>.pth
+```
+
+
 
 ## Reference
 Some of the codes in this repo are borrowed from:

@@ -48,6 +48,8 @@ CBIS_pre/
         msk/  # testing masks
 ```
 
+Images are resized to 192x256 during loading to match the network input.
+
 Training on two GPUs can be launched by
 
 ```

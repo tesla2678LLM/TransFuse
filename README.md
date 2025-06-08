@@ -51,6 +51,7 @@ CBIS_pre/
 The loader expects 256x256 RGB images and masks. If your data is already this
 size, no additional resizing is performed.
 
+
 Training on two GPUs can be launched by
 
 ```

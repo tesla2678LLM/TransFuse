@@ -118,8 +118,9 @@ class TransFuse_S(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
-        x_b = x_b.view(x_b.shape[0], -1, 12, 16)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
+        # reshape tokens to 16x16 feature map for 256x256 inputs
+        x_b = x_b.view(x_b.shape[0], -1, 16, 16)
         x_b = self.drop(x_b)
 
         x_b_1 = self.up1(x_b)
@@ -218,8 +219,8 @@ class TransFuse_L(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
-        x_b = x_b.view(x_b.shape[0], -1, 12, 16)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
+        x_b = x_b.view(x_b.shape[0], -1, 16, 16)
         x_b = self.drop(x_b)
 
         x_b_1 = self.up1(x_b)
@@ -322,7 +323,7 @@ class TransFuse_L_384(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
         x_b = x_b.view(x_b.shape[0], -1, 24, 32)
         x_b = self.drop(x_b)
 

@@ -79,8 +79,7 @@ class FolderDataset(data.Dataset):
     def __getitem__(self, index):
         image = cv2.imread(self.img_paths[index])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        # Resize to match network input (H=256, W=256)
+        # ensure size 256x256 for network input
         image = cv2.resize(image, (256, 256))
         gt = cv2.imread(self.mask_paths[index], 0)
         gt = cv2.resize(gt, (256, 256))

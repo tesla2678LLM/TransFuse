@@ -14,7 +14,13 @@ from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 class ChannelPool(nn.Module):
     def forward(self, x):
-        return torch.cat( (torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1)
+        return torch.cat(
+            (
+                torch.max(x, 1)[0].unsqueeze(1),
+                torch.mean(x, 1).unsqueeze(1)
+            ),
+            dim=1
+        ).contiguous()
 
 
 class BiFusion_block(nn.Module):
@@ -58,12 +64,12 @@ class BiFusion_block(nn.Module):
 
         # channel attetion for transformer branch
         x_in = x
-        x = x.mean((2, 3), keepdim=True)
+        x = x.mean((2, 3), keepdim=True).contiguous()
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
         x = self.sigmoid(x) * x_in
-        fuse = self.residual(torch.cat([g, x, bp], 1))
+        fuse = self.residual(torch.cat([g, x, bp], 1).contiguous())
 
         if self.drop_rate > 0:
             return self.dropout(fuse)
@@ -118,8 +124,9 @@ class TransFuse_S(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
-        x_b = x_b.view(x_b.shape[0], -1, 12, 16)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
+        # reshape tokens to 16x16 feature map for 256x256 inputs
+        x_b = x_b.view(x_b.shape[0], -1, 16, 16)
         x_b = self.drop(x_b)
 
         x_b_1 = self.up1(x_b)
@@ -218,8 +225,8 @@ class TransFuse_L(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
-        x_b = x_b.view(x_b.shape[0], -1, 12, 16)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
+        x_b = x_b.view(x_b.shape[0], -1, 16, 16)
         x_b = self.drop(x_b)
 
         x_b_1 = self.up1(x_b)
@@ -322,7 +329,7 @@ class TransFuse_L_384(nn.Module):
     def forward(self, imgs, labels=None):
         # bottom-up path
         x_b = self.transformer(imgs)
-        x_b = torch.transpose(x_b, 1, 2)
+        x_b = torch.transpose(x_b, 1, 2).contiguous()
         x_b = x_b.view(x_b.shape[0], -1, 24, 32)
         x_b = self.drop(x_b)
 
@@ -430,7 +437,7 @@ class Up(nn.Module):
 
             if self.attn_block is not None:
                 x2 = self.attn_block(x1, x2)
-            x1 = torch.cat([x2, x1], dim=1)
+            x1 = torch.cat([x2, x1], dim=1).contiguous()
         x = x1
         return self.conv(x)
 
